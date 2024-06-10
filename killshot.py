@@ -1,3 +1,4 @@
+
 import argparse
 import sys
 import os
@@ -35,52 +36,53 @@ def main():
 
     # Adding command-line arguments to the parser
     parser.add_argument(
-        '-l', '--log',
+        '-l', '--log', 
         help="Enable logging to a file. Usage: --log [level] [file]",
         nargs='*',
         default=[]
     )
     parser.add_argument(
-        '-v', '--verbose',
+        '-v', '--verbose', 
         help="Increase output verbosity",
         action='store_true'
     )
     parser.add_argument(
-        '-V', '--version',
+        '-V', '--version', 
         help="Show the script version and exit",
         action='version',
         version=f'%(prog)s {SCRIPT_VERSION}'
     )
     parser.add_argument(
-        '-d', '--device',
+        '-d', '--device', 
         help="Specify the network device to use",
         type=str,
         required=False
-    )                                                                                       parser.add_argument(
-        '-F', '--filter',
+    )
+    parser.add_argument(
+        '-F', '--filter', 
         help="Apply filters (e.g., channel, band, etc.)",
         type=str,
         nargs='+',
         choices=['channel', 'band']
     )
     parser.add_argument(
-        '-b', '--no-banner',
+        '-b', '--no-banner', 
         help="Do not display the banner",
         action='store_true'
     )
     parser.add_argument(
-        '-L', '--list-devices',
+        '-L', '--list-devices', 
         help="List all network devices",
         action='store_true'
     )
-
+    
     # Parse the command-line arguments
     args = parser.parse_args()
 
     # Handle logging if --log is specified
     if args.log:
         setup_logging(args.log)
-
+    
     # Handle verbosity if --verbose is specified
     if args.verbose:
         enable_verbose_output()
@@ -89,10 +91,10 @@ def main():
     if args.list_devices:
         list_network_devices()
         sys.exit(0)
-
+    
     # Extract the network device from the parsed arguments
     device = args.device
-
+    
     # Extract filters if provided
     filters = args.filter
 
@@ -106,7 +108,7 @@ def main():
     if device and not is_device_in_monitor_mode(device):
         console.print(f"[bold red]ERROR:[/] Device {device} is not in monitor mode.")
         enable_monitor = console.input(f"Would you like Killshot to attempt to enable monitor mode on {device}? [Y/n]: ").strip().lower()
-
+        
         if enable_monitor == 'y' or enable_monitor == '':
             if enable_monitor_mode(device):
                 console.print(f"[bold green]SUCCESS:[/] Monitor mode enabled on {device}.")
@@ -127,20 +129,23 @@ def display_banner():
     Function to display the ASCII banner.
     """
     banner = """
-
-  888 88P ,e, 888 888       888                 d8
-  888 8P   "  888 888  dP"Y 888 ee   e88 88e   d88
-  888 K   888 888 888 C88b  888 88b d888 888b d88888
-  888 8b  888 888 888  Y88D 888 888 Y888 888P  888
-  888 88b 888 888 888 d,dP  888 888  "88 88"   888
-
-    """                                                                                    # tu.hTitle("DTRH.net", position='left', char='-')
+						    
+  888 88P ,e, 888 888       888                 d8   
+  888 8P   "  888 888  dP"Y 888 ee   e88 88e   d88   
+  888 K   888 888 888 C88b  888 88b d888 888b d88888 
+  888 8b  888 888 888  Y88D 888 888 Y888 888P  888   
+  888 88b 888 888 888 d,dP  888 888  "88 88"   888   
+                                                     
+    """
+   # tu.hTitle("DTRH.net", position='left', char='-')
     print(banner)
 
 def setup_logging(log_args):
-    """                                                                                     Function to set up logging based on provided arguments.
+    """
+    Function to set up logging based on provided arguments.
     :param log_args: List containing log level and optional file path.
-    """                                                                                     # Default log level and file path
+    """
+    # Default log level and file path
     log_level = logging.INFO
     log_file = "killshot.log"
 
@@ -162,7 +167,7 @@ def setup_logging(log_args):
                 '5': logging.CRITICAL
             }
             log_level = level_mapping.get(level_arg, logging.INFO)
-
+        
         if len(log_args) == 2:
             # Determine the log file path
             log_file = log_args[1]
@@ -230,7 +235,8 @@ def enable_monitor_mode(device):
 
 def display_all_devices():
     """
-    Function to display all wireless devices using airmon-ng.                               """
+    Function to display all wireless devices using airmon-ng.
+    """
     try:
         console.print("[bold yellow]INFO:[/] Displaying all wireless devices:")
         subprocess.run(['airmon-ng'], check=True)
@@ -241,14 +247,16 @@ def display_all_devices():
     except subprocess.CalledProcessError as e:
         logging.error(f"Error displaying wireless devices: {e}")
 
-def list_network_devices():                                                                 """
+def list_network_devices():
+    """
     Function to list all network devices using the ip link command.
     """
     try:
         # Run the ip link command to get network devices information
-        result = subprocess.run(['ip', 'link'], capture_output=True, text=True)                 # Parse the output to extract device information
+        result = subprocess.run(['ip', 'link'], capture_output=True, text=True)
+        # Parse the output to extract device information
         devices = parse_ip_link_output(result.stdout)
-
+        
         # Display the devices in a table
         table = Table(title="Network Devices")
         table.add_column("Type", style="cyan", no_wrap=True)
@@ -257,7 +265,7 @@ def list_network_devices():                                                     
 
         for device in devices:
             table.add_row(device['type'], device['name'], device['status'])
-
+        
         console.print(table)
     except FileNotFoundError:
         console.print("[bold red]ERROR:[/] ip command is not found. Please ensure the necessary networking tools are installed.")
@@ -286,7 +294,8 @@ def parse_ip_link_output(output):
 
             parts = line.split(": ")
             if len(parts) >= 2:
-                device_name = parts[1].split()[0]                                                       current_device['name'] = device_name
+                device_name = parts[1].split()[0]
+                current_device['name'] = device_name
                 current_device['status'] = "UP" if "UP" in parts[1] else "DOWN"
         else:
             if "link/" in line:
@@ -296,7 +305,8 @@ def parse_ip_link_output(output):
     if current_device:
         devices.append(current_device)
 
-    return devices                                                                      
+    return devices
+
 def scan_networks(device, filters):
     """
     Function to scan networks.
